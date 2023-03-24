@@ -47,6 +47,7 @@ targets = $(addsuffix -in-docker, $(LIST))
 
 build: prebuild
 	@$(MAKE) build/darwin/$(NAME)
+	@$(MAKE) build/darwin/$(NAME)-arm64
 	@$(MAKE) build/linux/$(NAME)-amd64
 	@$(MAKE) build/linux/$(NAME)-arm64
 	@$(MAKE) build/linux/$(NAME)-armhf
@@ -72,6 +73,12 @@ $(targets): %-in-docker: .env.docker
 build/darwin/$(NAME):
 	mkdir -p build/darwin
 	CGO_ENABLED=0 GOOS=darwin go build -a -asmflags=-trimpath=/src -gcflags=-trimpath=/src \
+										-ldflags "-s -w -X main.Version=$(VERSION)" \
+										-o build/darwin/$(NAME) cmd/sigil.go
+
+build/darwin/$(NAME)-arm64:
+	mkdir -p build/darwin
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -asmflags=-trimpath=/src -gcflags=-trimpath=/src \
 										-ldflags "-s -w -X main.Version=$(VERSION)" \
 										-o build/darwin/$(NAME) cmd/sigil.go
 
@@ -194,7 +201,8 @@ release: build bin/gh-release
 	tar -zcf release/$(NAME)_$(VERSION)_linux_amd64.tgz -C build/linux $(NAME)-amd64
 	tar -zcf release/$(NAME)_$(VERSION)_linux_arm64.tgz -C build/linux $(NAME)-arm64
 	tar -zcf release/$(NAME)_$(VERSION)_linux_armhf.tgz -C build/linux $(NAME)-armhf
-	tar -zcf release/$(NAME)_$(VERSION)_darwin_$(HARDWARE).tgz -C build/darwin $(NAME)
+	tar -zcf release/$(NAME)_$(VERSION)_darwin_x86_64.tgz -C build/darwin $(NAME)
+	tar -zcf release/$(NAME)_$(VERSION)_darwin_arm64.tgz -C build/darwin $(NAME)-arm64
 	cp build/deb/$(NAME)_$(VERSION)_amd64.deb release/$(NAME)_$(VERSION)_amd64.deb
 	cp build/deb/$(NAME)_$(VERSION)_arm64.deb release/$(NAME)_$(VERSION)_arm64.deb
 	cp build/deb/$(NAME)_$(VERSION)_armhf.deb release/$(NAME)_$(VERSION)_armhf.deb
