@@ -80,7 +80,7 @@ build/darwin/$(NAME)-arm64:
 	mkdir -p build/darwin
 	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -asmflags=-trimpath=/src -gcflags=-trimpath=/src \
 										-ldflags "-s -w -X main.Version=$(VERSION)" \
-										-o build/darwin/$(NAME) cmd/sigil.go
+										-o build/darwin/$(NAME)-arm64 cmd/sigil.go
 
 build/linux/$(NAME)-amd64:
 	mkdir -p build/linux
